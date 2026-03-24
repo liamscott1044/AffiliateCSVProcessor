@@ -352,6 +352,19 @@ input[type="number"]:focus {
 }
 
 .btn-primary:hover { background: #bf201c; }
+.btn-primary-inactive {
+  background: #E8706D;
+  color: var(--white);
+  cursor: pointer;
+}
+.btn-primary-inactive:hover { background: #df5a57; }
+#brandError {
+  display: none;
+  font-size: 10px;
+  color: var(--red);
+  margin-top: 6px;
+  font-family: 'MaisonNeue', 'Helvetica Neue', sans-serif;
+}
 .btn-primary:disabled {
   background: var(--gray-light);
   color: var(--gray-mid);
@@ -488,9 +501,10 @@ footer {
     <div class="chunk-preview" id="chunkList"></div>
 
     <div class="actions">
-      <button class="btn btn-primary" id="downloadBtn">Download ZIP</button>
+      <button class="btn btn-primary-inactive" id="downloadBtn">Download ZIP</button>
       <button class="btn btn-secondary" id="resetBtn">Reset</button>
     </div>
+    <p id="brandError">Enter Brand or Campaign Name</p>
   </div>
 
 </main>
@@ -568,7 +582,7 @@ function buildChunks(rows, chunkSize) {
   const tierInfo = [];
   for (const num of tierNums) {
     const handles = tierMap[num];
-    const label = num === -1 ? 'Unprioritized' : `P${num}`;
+    const label = num === -1 ? 'Unranked' : `P${num}`;
     tierInfo.push({ label, count: handles.length });
     for (const h of handles) ordered.push({ handle: h, tierNum: num });
   }
@@ -676,9 +690,20 @@ function renderPreview(rows) {
   previewCard.style.display = 'block';
 }
 
+const brandError = document.getElementById('brandError');
+
+brandName.addEventListener('input', () => {
+  if (brandName.value.trim()) {
+    downloadBtn.classList.replace('btn-primary-inactive', 'btn-primary');
+    brandError.style.display = 'none';
+  } else {
+    downloadBtn.classList.replace('btn-primary', 'btn-primary-inactive');
+  }
+});
+
 downloadBtn.addEventListener('click', async () => {
   const brand = brandName.value.trim();
-  if (!brand) { showStatus('Please enter a brand name before downloading.', 'error'); return; }
+  if (!brand) { brandError.style.display = 'block'; return; }
   if (!parsedData) return;
 
   const size = parseInt(chunkSizeInput.value) || 500;
